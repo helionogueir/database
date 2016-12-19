@@ -1,2 +1,2 @@
-# database
+# Database
 Database manipulation routines
