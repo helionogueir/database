@@ -6,6 +6,7 @@
     "keywords": ["library", "tool", "database", "routines", "manipulation", "migrate", "type"],
     "require": {
         "php": ">=7.0",
+        "helionogueir/shell": "v1.0.0",
         "helionogueir/languagepack": "v1.1.0"
     },
     "autoload": {

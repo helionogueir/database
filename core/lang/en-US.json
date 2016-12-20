@@ -1,0 +1,8 @@
+{
+    "database:execute:pathname:invalid": "\"{data:pathName}\" not exist, or it's not array, or invalid",
+    "database:byjsonfile:routine:invalid": "Routine invalid check JSON file",
+    "database:database:invalid": "Database invalid parameters",
+    "database:byjsonfile:classname:invalid": "Class \"{data:className}\" not exist",
+    "database:database:info:parameter:invalid": "\"{data:name}:{data:value}\" database parameter invalid",
+    "database:byjsonfile:methodname:invalid": "Method \"{data:methodName}\" of class \"{data:className}\" not exist"
+}

@@ -1,0 +1,23 @@
+[
+    {
+        "helionogueir\\database\\column\\Change": {
+            "dataType": {
+                "database": {
+                    "dsn": "mysql",
+                    "host": "localhost",
+                    "dbname": "db_d_gestorfox",
+                    "user": "root",
+                    "password": "root",
+                    "port": "3306",
+                    "charset": "utf8"
+                },
+                "variable": {
+                    "table": "erp_concessionaria",
+                    "column": "id_concessionaria",
+                    "type": "BIGINT(18)"
+                }
+            }
+        }
+    }
+]
+
