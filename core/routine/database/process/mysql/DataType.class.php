@@ -5,6 +5,8 @@ namespace helionogueir\database\routine\database\process\mysql;
 use PDO;
 use stdClass;
 use Exception;
+use helionogueir\shell\Output;
+use helionogueir\languagepack\Lang;
 use helionogueir\database\routine\database\Info;
 use helionogueir\database\routine\database\Process;
 use helionogueir\database\routine\database\process\mysql\FindForeignKey;
@@ -20,22 +22,20 @@ class DataType implements Process {
   private $column = null;
   private $type = null;
 
-  public function render(PDO $pdo, Info $info, stdClass $variables): bool {
-    $executed = true;
-    try {
-      if ($queries = $this->get($pdo, $info, $variables)) {
-        $executed = true;
-      }
-    } catch (Exception $ex) {
-      $executed = false;
-      throw $ex;
+  public function render(PDO $pdo, Info $info, stdClass $variables, Output $output): bool {
+    $executed = false;
+    if ($queries = $this->get($pdo, $info, $variables, $output)) {
+      $executed = true;
     }
     return $executed;
   }
 
-  public function get(PDO $pdo, Info $info, stdClass $variables): Array {
+  public function get(PDO $pdo, Info $info, stdClass $variables, Output $output = null): Array {
     $queries = Array();
     try {
+      if (!is_null($output)) {
+        $output->display(Lang::get("database:trace:start", "helionogueir/database", Array("classname" => __CLASS__)));
+      }
       $pdo->beginTransaction();
       if ($steps = $this->prepareSteps($pdo, $info, $variables)) {
         foreach ($steps as $step) {
@@ -44,11 +44,17 @@ class DataType implements Process {
               $queries[] = $sql;
               $stmt = $pdo->prepare($sql);
               $stmt->execute();
+              if (!is_null($output)) {
+                $output->display($sql, 1, "-");
+              }
             }
           }
         }
       }
       $pdo->commit();
+      if (!is_null($output)) {
+        $output->display(Lang::get("database:trace:finish", "helionogueir/database", Array("classname" => __CLASS__)));
+      }
     } catch (Exception $ex) {
       $queries = Array();
       $pdo->rollBack();

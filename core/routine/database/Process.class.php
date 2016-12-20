@@ -4,6 +4,7 @@ namespace helionogueir\database\routine\database;
 
 use PDO;
 use stdClass;
+use helionogueir\shell\Output;
 use helionogueir\database\routine\database\Info;
 
 /**
@@ -18,16 +19,18 @@ interface Process {
    * @param PDO $pdo MySQL PDO
    * @param helionogueir\database\routine\database\Info $info Database info connection
    * @param stdClass $variables Content variables for execute functionality
+   * @param helionogueir\shell\Output $output Output class
    * @return bool Case true executed queries
    */
-  public function render(PDO $pdo, Info $info, stdClass $variables): bool;
+  public function render(PDO $pdo, Info $info, stdClass $variables, Output $output): bool;
 
   /**
    * - Render change data type
    * @param PDO $pdo MySQL PDO
    * @param helionogueir\database\routine\database\Info $info Database info connection
    * @param stdClass $variables Content variables for execute functionality
+   * @param helionogueir\shell\Output $output Output class
    * @return Array Results
    */
-  public function get(PDO $pdo, Info $info, stdClass $variables): Array;
+  public function get(PDO $pdo, Info $info, stdClass $variables, Output $output = null): Array;
 }

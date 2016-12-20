@@ -3,6 +3,8 @@
     "database:byjsonfile:routine:invalid": "Routine invalid check JSON file",
     "database:database:invalid": "Database invalid parameters",
     "database:byjsonfile:classname:invalid": "Class \"{data:className}\" not exist",
+    "database:trace:start": "Start routine \"{data:className}\"",
+    "database:trace:finish": "Finish routine \"{data:className}\"",
     "database:database:info:parameter:invalid": "\"{data:name}:{data:value}\" database parameter invalid",
     "database:byjsonfile:methodname:invalid": "Method \"{data:methodName}\" of class \"{data:className}\" not exist"
 }

@@ -4,6 +4,7 @@ namespace helionogueir\database\command;
 
 use Exception;
 use SplFileObject;
+use helionogueir\shell\Output;
 use helionogueir\languagepack\Lang;
 use helionogueir\database\autoload\Environment;
 use helionogueir\database\command\execute\ByJsonFile;
@@ -14,6 +15,18 @@ use helionogueir\database\command\execute\ByJsonFile;
  * @version v1.0.0
  */
 class Execute {
+
+  private $output = null;
+
+  /**
+   * - Construct execute and define if output mode
+   * @param helionogueir\shell\Output $output Output class
+   * @return null
+   */
+  public function __construct(Output $output = null) {
+    $this->output = $output;
+    return null;
+  }
 
   /**
    * - Execute command by configuration file
@@ -28,7 +41,7 @@ class Execute {
         $trouble = false;
         $execute = new ByJsonFile();
         foreach ($routines as $routine) {
-          $execute->render($routine);
+          $execute->render($routine, $this->output);
         }
       }
     }
