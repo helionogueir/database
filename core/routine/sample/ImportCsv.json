@@ -1,7 +1,7 @@
 [
     {
-        "helionogueir\\database\\column\\Change": {
-            "dataType": {
+        "helionogueir\\database\\table\\Import": {
+            "csv": {
                 "database": {
                     "dsn": "mysql",
                     "host": "localhost",
@@ -14,10 +14,9 @@
                 "variable": {
                     "table": "my_table",
                     "column": "id_my_table",
-                    "type": "BIGINT(18)"
+                    "pathName": "/path/to/file/csv/registers.csv"
                 }
             }
         }
     }
 ]
-

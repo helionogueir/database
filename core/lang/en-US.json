@@ -7,6 +7,7 @@
     "database:trace:finish": "Finish routine \"{data:className}\"",
     "database:json:paramter:invalid": "Parameter \"{data:paramter}\" invalid, please check the JSON file",
     "database:paramter:not:readable": "File \"{data:paramter}\" not readable",
+    "database:csv:values:total:invalid": "Total fields ({data:fields}) and values ({data:values}) are different, please check the CSV (Line {data:line})",
     "database:database:info:parameter:invalid": "\"{data:name}:{data:value}\" database parameter invalid",
     "database:byjsonfile:methodname:invalid": "Method \"{data:methodName}\" of class \"{data:className}\" not exist"
 }

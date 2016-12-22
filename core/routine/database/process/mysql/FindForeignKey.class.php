@@ -36,19 +36,19 @@ class FindForeignKey implements Process {
         $output->display(Lang::get("database:trace:start", "helionogueir/database", Array("classname" => __CLASS__)));
       }
       if ($this->factoryParameter($variables)) {
-        $sql = "SELECT
-                  CONSTRAINT_NAME AS `foreignKey`,
-                  TABLE_SCHEMA AS `schema`,
-                  TABLE_NAME AS `table`,
-                  COLUMN_NAME AS `column`,
-                  REFERENCED_TABLE_SCHEMA AS `schemaReferenced`,
-                  REFERENCED_TABLE_NAME AS `tableReferenced`,
-                  REFERENCED_COLUMN_NAME AS `columnReferenced`
-                FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-                WHERE TABLE_SCHEMA = :dbname
-                AND REFERENCED_TABLE_NAME = :table
-                AND REFERENCED_COLUMN_NAME = :column";
-        $stmt = $pdo->prepare($sql);
+        $select = "SELECT
+                    CONSTRAINT_NAME AS `foreignKey`,
+                    TABLE_SCHEMA AS `schema`,
+                    TABLE_NAME AS `table`,
+                    COLUMN_NAME AS `column`,
+                    REFERENCED_TABLE_SCHEMA AS `schemaReferenced`,
+                    REFERENCED_TABLE_NAME AS `tableReferenced`,
+                    REFERENCED_COLUMN_NAME AS `columnReferenced`
+                  FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                  WHERE TABLE_SCHEMA = :dbname
+                  AND REFERENCED_TABLE_NAME = :table
+                  AND REFERENCED_COLUMN_NAME = :column";
+        $stmt = $pdo->prepare($select);
         $stmt->execute(Array(
           "dbname" => $info->getDbname(),
           "table" => $this->table,

@@ -20,6 +20,7 @@ use helionogueir\database\routine\database\Process;
 class Csv implements Process {
 
   private $table = null;
+  private $primaryKey = null;
   private $pathName = null;
 
   public function render(PDO $pdo, Info $info, stdClass $variables, Output $output): bool {
@@ -36,37 +37,75 @@ class Csv implements Process {
       if (!is_null($output)) {
         $output->display(Lang::get("database:trace:start", "helionogueir/database", Array("classname" => __CLASS__)));
       }
+      $pdo->beginTransaction();
       if ($this->factoryParameter($variables)) {
         $csv = new SplFileObject($this->pathName, "r");
         $csv->rewind();
-        var_dump($csv->current());
-        die;
-        /* $pdo->beginTransaction();
-          if ($steps = $this->prepareSteps($pdo, $info, $variables)) {
-          foreach ($steps as $step) {
-          if (count($step)) {
-          foreach ($step as $sql) {
-          $queries[] = $sql;
-          $stmt = $pdo->prepare($sql);
-          $stmt->execute();
+        $fields = str_getcsv($csv->current(), ";", "\"");
+        $insert = "INSERT INTO `{$info->getDbname()}`.`{$this->table}` (`" . implode("`, `", $fields) . "`) VALUES (:" . implode(", :", $fields) . ")";
+        $stmt = $pdo->prepare($insert);
+        while (!$csv->eof()) {
+          $values = $this->formatValues($fields, $csv->fgetcsv(";", "\""), $csv->key());
+          if (!$this->checkRegisterWasInserted($pdo, $info, $values)) {
+            $queries[] = json_encode($values);
+            $stmt->execute($values);
+          }
           if (!is_null($output)) {
-          $output->display($sql, 1, "-");
+            $output->display(json_encode($values), 1, "-");
           }
-          }
-          }
-          }
-          }
-          $pdo->commit(); */
+        }
       }
+      $pdo->commit();
       if (!is_null($output)) {
         $output->display(Lang::get("database:trace:finish", "helionogueir/database", Array("classname" => __CLASS__)));
       }
     } catch (Exception $ex) {
       $queries = Array();
-      //$pdo->rollBack();
+      $pdo->rollBack();
       throw $ex;
     }
     return $queries;
+  }
+
+  /**
+   * - Check if register was inserted
+   * @param PDO $pdo MySQL PDO
+   * @param helionogueir\database\routine\database\Info $info Database info connection
+   * @param Array $values Values of to be insert in table
+   * @return bool Case exist return true, case not exist return false
+   */
+  private function checkRegisterWasInserted(PDO $pdo, Info $info, Array $values): bool {
+    $exist = false;
+    if (isset($values[$this->primaryKey]) && ("DEFAULT" != $values[$this->primaryKey])) {
+      $select = "SELECT COUNT(`{$this->primaryKey}`) AS `total` FROM `{$info->getDbname()}`.`{$this->table}` WHERE `{$this->primaryKey}` = :id";
+      $stmt = $pdo->prepare($select);
+      $stmt->execute(Array("id" => $values[$this->primaryKey]));
+      foreach ($stmt->fetchAll() as $row) {
+        $exist = (!empty($row->total)) ? true : false;
+      }
+    }
+    return $exist;
+  }
+
+  /**
+   * - Format values to be insert in table
+   * @param Array $fields Names fields of values
+   * @param Array $values Values of to be insert in table
+   * @param Array int CSV line of file
+   * @return Array Return values to be insert in table
+   */
+  private function formatValues(Array $fields, Array $values, int $line): Array {
+    $row = Array();
+    if (count($fields) == count($values)) {
+      foreach ($values as &$value) {
+        $value = (preg_match("/^(null)$/i", $value)) ? null : $value;
+      }
+      $row = array_combine($fields, $values);
+    } else {
+      Lang::addRoot(Environment::PACKAGE, Environment::PATH);
+      throw new Exception(Lang::get("database:csv:values:total:invalid", "helionogueir/database", Array("fields" => count($fields), "values" => count($values), "line" => "{$line} or " . ($line + 1))));
+    }
+    return $row;
   }
 
   /**
@@ -77,7 +116,7 @@ class Csv implements Process {
   private function factoryParameter(stdClass $variables): bool {
     $match = true;
     Lang::addRoot(Environment::PACKAGE, Environment::PATH);
-    foreach (Array("table", "pathName")as $parameter) {
+    foreach (Array("table", "primaryKey", "pathName")as $parameter) {
       if (empty($variables->{$parameter})) {
         $match = false;
         throw new Exception(Lang::get("database:json:paramter:invalid", "helionogueir/database", Array("paramter" => $parameter)));
@@ -85,7 +124,7 @@ class Csv implements Process {
         $this->{$parameter} = $variables->{$parameter};
       }
     }
-    if (!is_readable($this->pathName) && !preg_match("/^(.*)(\.csv)$/i", $subject)) {
+    if (!is_readable($this->pathName) && !preg_match("/^(.*)(\.csv)$/i", $this->pathName)) {
       throw new Exception(Lang::get("database:paramter:not:readable", "helionogueir/database", Array("paramter" => $this->pathName)));
     }
     return $match;
