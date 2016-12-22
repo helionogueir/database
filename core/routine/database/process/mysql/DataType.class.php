@@ -7,6 +7,7 @@ use stdClass;
 use Exception;
 use helionogueir\shell\Output;
 use helionogueir\languagepack\Lang;
+use helionogueir\database\autoload\Environment;
 use helionogueir\database\routine\database\Info;
 use helionogueir\database\routine\database\Process;
 use helionogueir\database\routine\database\process\mysql\FindForeignKey;
@@ -95,11 +96,14 @@ class DataType implements Process {
    * @return bool Return true case match variable
    */
   private function factoryParameter(stdClass $variables): bool {
-    $match = false;
-    foreach ($variables as $name => $value) {
-      if (preg_match("/(table|column|type)/i", $name)) {
-        $this->{$name} = $value;
-        $match = true;
+    $match = true;
+    Lang::addRoot(Environment::PACKAGE, Environment::PATH);
+    foreach (Array("table", "column", "type")as $parameter) {
+      if (empty($variables->{$parameter})) {
+        $match = false;
+        throw new Exception(Lang::get("database:json:paramter:invalid", "helionogueir/database", Array("paramter" => $parameter)));
+      } else {
+        $this->{$parameter} = $variables->{$parameter};
       }
     }
     return $match;
