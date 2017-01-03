@@ -7,14 +7,14 @@ use stdClass;
 use helionogueir\shell\Output;
 use helionogueir\database\Routine;
 use helionogueir\database\routine\database\Info;
-use helionogueir\database\routine\database\process\mysql\ChangeDataType;
+use helionogueir\database\routine\database\process\mysql\AddAutoIncrement;
 
 /**
- * - Change behavior of column
+ * - Add behavior of column
  * @author Helio Nogueira <helio.nogueir@gmail.com>
  * @version v1.0.0
  */
-class Change implements Routine {
+class Add implements Routine {
 
   private $info = null;
   private $pdo = null;
@@ -32,8 +32,8 @@ class Change implements Routine {
    * @param stdClass $variable Content variables for execute functionality
    * @return null
    */
-  public function dataType(stdClass $variable) {
-    (new ChangeDataType())->render($this->pdo, $this->info, $variable, $this->output);
+  public function autoIncrement(stdClass $variable) {
+    (new AddAutoIncrement())->render($this->pdo, $this->info, $variable, $this->output);
   }
 
 }

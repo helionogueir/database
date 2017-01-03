@@ -17,7 +17,7 @@ use helionogueir\database\routine\database\process\mysql\FindForeignKey;
  * @author Helio Nogueira <helio.nogueir@gmail.com>
  * @version v1.0.0
  */
-class DataType implements Process {
+class ChangeDataType implements Process {
 
   private $table = null;
   private $column = null;
@@ -78,12 +78,12 @@ class DataType implements Process {
       $steps = Array(
         "removeForeignKey" => Array(),
         "changeDataType" => Array(),
-        "changeReferenceTable" => Array("ALTER TABLE `{$info->getDbname()}`.`{$this->table}` MODIFY COLUMN `id_concessionaria` {$this->type};"),
+        "changeReferenceTable" => Array("ALTER TABLE `{$info->getDbname()}`.`{$this->table}` MODIFY COLUMN `{$this->column}` {$this->type};"),
         "addForeignKey" => Array()
       );
       foreach ((new FindForeignKey())->get($pdo, $info, $variables) as $query) {
         $steps["removeForeignKey"][] = "ALTER TABLE `{$query->schema}`.`{$query->table}` DROP FOREIGN KEY `{$query->foreignKey}`;";
-        $steps["changeDataType"][] = "ALTER TABLE `{$query->schema}`.`{$query->table}` MODIFY COLUMN `id_concessionaria` {$this->type};";
+        $steps["changeDataType"][] = "ALTER TABLE `{$query->schema}`.`{$query->table}` MODIFY COLUMN `{$this->column}` {$this->type};";
         $steps["addForeignKey"][] = "ALTER TABLE `{$query->schema}`.`{$query->table}` ADD CONSTRAINT `{$query->foreignKey}` FOREIGN KEY (`{$query->column}`) REFERENCES `{$query->schemaReferenced}`.`{$query->tableReferenced}` (`{$query->columnReferenced}`) ON UPDATE NO ACTION ON DELETE NO ACTION;";
       }
     }
