@@ -1,12 +1,12 @@
 <?php
 
-namespace helionogueir\database\routine\database\process\mysql;
+namespace helionogueir\database\routine\database\process\mysql\import;
 
 use PDO;
 use stdClass;
 use Exception;
 use SplFileObject;
-use helionogueir\shell\Output;
+use helionogueir\shell\output\Trace;
 use helionogueir\languagepack\Lang;
 use helionogueir\database\autoload\Environment;
 use helionogueir\database\routine\database\Info;
@@ -23,7 +23,7 @@ class Csv implements Process {
   private $primaryKey = null;
   private $pathName = null;
 
-  public function render(PDO $pdo, Info $info, stdClass $variables, Output $output): bool {
+  public function render(PDO $pdo, Info $info, stdClass $variables, Trace $output): bool {
     $executed = false;
     if ($queries = $this->get($pdo, $info, $variables, $output)) {
       $executed = true;
@@ -31,7 +31,7 @@ class Csv implements Process {
     return $executed;
   }
 
-  public function get(PDO $pdo, Info $info, stdClass $variables, Output $output = null): Array {
+  public function get(PDO $pdo, Info $info, stdClass $variables, Trace $output = null): Array {
     $queries = Array();
     try {
       if (!is_null($output)) {

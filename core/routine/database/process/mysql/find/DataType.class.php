@@ -1,11 +1,11 @@
 <?php
 
-namespace helionogueir\database\routine\database\process\mysql;
+namespace helionogueir\database\routine\database\process\mysql\find;
 
 use PDO;
 use stdClass;
 use Exception;
-use helionogueir\shell\Output;
+use helionogueir\shell\output\Trace;
 use helionogueir\languagepack\Lang;
 use helionogueir\database\autoload\Environment;
 use helionogueir\database\routine\database\Info;
@@ -16,12 +16,12 @@ use helionogueir\database\routine\database\Process;
  * @author Helio Nogueira <helio.nogueir@gmail.com>
  * @version v1.0.0
  */
-class FindDataType implements Process {
+class DataType implements Process {
 
   private $table = null;
   private $column = null;
 
-  public function render(PDO $pdo, Info $info, stdClass $variables, Output $output): bool {
+  public function render(PDO $pdo, Info $info, stdClass $variables, Trace $output): bool {
     $executed = false;
     if ($queries = $this->get($pdo, $info, $variables, $output)) {
       $executed = true;
@@ -29,7 +29,7 @@ class FindDataType implements Process {
     return $executed;
   }
 
-  public function get(PDO $pdo, Info $info, stdClass $variables, Output $output = null): Array {
+  public function get(PDO $pdo, Info $info, stdClass $variables, Trace $output = null): Array {
     $queries = Array();
     try {
       if (!is_null($output)) {

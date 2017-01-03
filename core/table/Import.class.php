@@ -4,10 +4,10 @@ namespace helionogueir\database\table;
 
 use PDO;
 use stdClass;
-use helionogueir\shell\Output;
+use helionogueir\shell\output\Trace;
 use helionogueir\database\Routine;
 use helionogueir\database\routine\database\Info;
-use helionogueir\database\routine\database\process\mysql\Csv;
+use helionogueir\database\routine\database\process\mysql\import\Csv;
 
 /**
  * - Change behavior of column
@@ -20,7 +20,7 @@ class Import implements Routine {
   private $pdo = null;
   private $output = null;
 
-  public function __construct(Info $info, PDO $pdo, Output $output = null) {
+  public function __construct(Info $info, PDO $pdo, Trace $output = null) {
     $this->info = $info;
     $this->pdo = $pdo;
     $this->output = $output;

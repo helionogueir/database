@@ -3,7 +3,7 @@
 namespace helionogueir\database;
 
 use PDO;
-use helionogueir\shell\Output;
+use helionogueir\shell\output\Trace;
 use helionogueir\database\routine\database\Info;
 
 /**
@@ -17,8 +17,8 @@ interface Routine {
    * - Construct routine of database
    * @param helionogueir\database\routine\database\Info $info Database info connection
    * @param PDO $pdo PDO Database connect
-   * @param helionogueir\shell\Output $output Output class
+   * @param helionogueir\shell\output\Trace $output Print class
    * @return null
    */
-  public function __construct(Info $info, PDO $pdo, Output $output = null);
+  public function __construct(Info $info, PDO $pdo, Trace $output = null);
 }

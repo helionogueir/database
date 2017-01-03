@@ -4,10 +4,10 @@ namespace helionogueir\database\column;
 
 use PDO;
 use stdClass;
-use helionogueir\shell\Output;
+use helionogueir\shell\output\Trace;
 use helionogueir\database\Routine;
 use helionogueir\database\routine\database\Info;
-use helionogueir\database\routine\database\process\mysql\ChangeDataType;
+use helionogueir\database\routine\database\process\mysql\change\DataType;
 
 /**
  * - Change behavior of column
@@ -20,7 +20,7 @@ class Change implements Routine {
   private $pdo = null;
   private $output = null;
 
-  public function __construct(Info $info, PDO $pdo, Output $output = null) {
+  public function __construct(Info $info, PDO $pdo, Trace $output = null) {
     $this->info = $info;
     $this->pdo = $pdo;
     $this->output = $output;
@@ -33,7 +33,7 @@ class Change implements Routine {
    * @return null
    */
   public function dataType(stdClass $variable) {
-    (new ChangeDataType())->render($this->pdo, $this->info, $variable, $this->output);
+    (new DataType())->render($this->pdo, $this->info, $variable, $this->output);
   }
 
 }

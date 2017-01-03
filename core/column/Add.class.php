@@ -4,10 +4,10 @@ namespace helionogueir\database\column;
 
 use PDO;
 use stdClass;
-use helionogueir\shell\Output;
+use helionogueir\shell\output\Trace;
 use helionogueir\database\Routine;
 use helionogueir\database\routine\database\Info;
-use helionogueir\database\routine\database\process\mysql\AddAutoIncrement;
+use helionogueir\database\routine\database\process\mysql\add\AutoIncrement;
 
 /**
  * - Add behavior of column
@@ -20,7 +20,7 @@ class Add implements Routine {
   private $pdo = null;
   private $output = null;
 
-  public function __construct(Info $info, PDO $pdo, Output $output = null) {
+  public function __construct(Info $info, PDO $pdo, Trace $output = null) {
     $this->info = $info;
     $this->pdo = $pdo;
     $this->output = $output;
@@ -33,7 +33,7 @@ class Add implements Routine {
    * @return null
    */
   public function autoIncrement(stdClass $variable) {
-    (new AddAutoIncrement())->render($this->pdo, $this->info, $variable, $this->output);
+    (new AutoIncrement())->render($this->pdo, $this->info, $variable, $this->output);
   }
 
 }

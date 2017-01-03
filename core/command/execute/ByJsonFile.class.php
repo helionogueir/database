@@ -4,7 +4,7 @@ namespace helionogueir\database\command\execute;
 
 use stdClass;
 use Exception;
-use helionogueir\shell\Output;
+use helionogueir\shell\output\Trace;
 use helionogueir\database\Routine;
 use helionogueir\languagepack\Lang;
 use helionogueir\database\routine\Database;
@@ -21,10 +21,10 @@ class ByJsonFile {
   /**
    * - Execute command by configuration file
    * @param stdClass $routine Object with info routine
-   * @param helionogueir\shell\Output $output Output class
+   * @param helionogueir\shell\output\Trace $output Print class
    * @return null
    */
-  public function render(stdClass $routine, Output $output = null) {
+  public function render(stdClass $routine, Trace $output = null) {
     if (count($routine) != 1) {
       Lang::addRoot(Environment::PACKAGE, Environment::PATH);
       throw new Exception(Lang::get("database:byjsonfile:routine:invalid", "helionogueir/database"));
@@ -48,10 +48,10 @@ class ByJsonFile {
    * @param string $className Class name
    * @param string $methodName Method name
    * @param stdClass $database Varibles PDO connection
-   * @param helionogueir\shell\Output $output Output class
+   * @param helionogueir\shell\output\Trace $output Print class
    * @return helionogueir\database\Routine Return class constructed
    */
-  private function factoryClass(string $className, string $methodName, stdClass $database, Output $output = null): Routine {
+  private function factoryClass(string $className, string $methodName, stdClass $database, Trace $output = null): Routine {
     if (!class_exists($className)) {
       Lang::addRoot(Environment::PACKAGE, Environment::PATH);
       throw new Exception(Lang::get("database:byjsonfile:classname:invalid", "helionogueir/database", Array("className" => $className)));
