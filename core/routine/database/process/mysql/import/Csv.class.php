@@ -98,7 +98,7 @@ class Csv implements Process {
     $row = Array();
     if (count($fields) == count($values)) {
       foreach ($values as &$value) {
-        $value = (preg_match("/^(null)$/i", $value)) ? null : $value;
+        $value = (preg_match("/^(null)$/i", $value)) ? null : trim($value);
       }
       $row = array_combine($fields, $values);
     } else {
