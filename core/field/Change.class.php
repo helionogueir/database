@@ -1,6 +1,6 @@
 <?php
 
-namespace helionogueir\database\column;
+namespace helionogueir\database\field;
 
 use PDO;
 use stdClass;
@@ -8,6 +8,7 @@ use helionogueir\shell\output\Trace;
 use helionogueir\database\Routine;
 use helionogueir\database\routine\database\Info;
 use helionogueir\database\routine\database\process\mysql\change\DataType;
+use helionogueir\database\routine\database\process\mysql\change\ForeignKey;
 
 /**
  * - Change behavior of column
@@ -34,6 +35,15 @@ class Change implements Routine {
    */
   public function dataType(stdClass $variable) {
     (new DataType())->render($this->pdo, $this->info, $variable, $this->output);
+  }
+
+  /**
+   * - Chancge foreign key
+   * @param stdClass $variable Content variables for execute functionality
+   * @return null
+   */
+  public function foreignKey(stdClass $variable) {
+    (new ForeignKey())->render($this->pdo, $this->info, $variable, $this->output);
   }
 
 }

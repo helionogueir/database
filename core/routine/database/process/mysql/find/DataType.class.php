@@ -31,6 +31,9 @@ class DataType implements Process {
 
   public function get(PDO $pdo, Info $info, stdClass $variables, Trace $output = null): Array {
     $queries = Array();
+    if (!$pdo->inTransaction()) {
+      $pdo->beginTransaction();
+    }
     try {
       if (!is_null($output)) {
         $output->display(Lang::get("database:trace:start", "helionogueir/database", Array("classname" => __CLASS__)));
@@ -47,6 +50,9 @@ class DataType implements Process {
           "table" => $this->table,
           "column" => $this->column
         ));
+        if ($pdo->inTransaction()) {
+          $pdo->commit();
+        }
         foreach ($stmt->fetchAll() as $row) {
           if (!empty($row->dataType)) {
             $queries[] = $row->dataType;
@@ -61,6 +67,9 @@ class DataType implements Process {
       }
     } catch (Exception $ex) {
       $queries = Array();
+      if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+      }
       throw $ex;
     }
     return $queries;

@@ -33,11 +33,13 @@ class Csv implements Process {
 
   public function get(PDO $pdo, Info $info, stdClass $variables, Trace $output = null): Array {
     $queries = Array();
+    if (!$pdo->inTransaction()) {
+      $pdo->beginTransaction();
+    }
     try {
       if (!is_null($output)) {
         $output->display(Lang::get("database:trace:start", "helionogueir/database", Array("classname" => __CLASS__)));
       }
-      $pdo->beginTransaction();
       if ($this->factoryParameter($variables)) {
         $csv = new SplFileObject($this->pathName, "r");
         $csv->rewind();
@@ -55,13 +57,17 @@ class Csv implements Process {
           }
         }
       }
-      $pdo->commit();
+      if ($pdo->inTransaction()) {
+        $pdo->commit();
+      }
       if (!is_null($output)) {
         $output->display(Lang::get("database:trace:finish", "helionogueir/database", Array("classname" => __CLASS__)));
       }
     } catch (Exception $ex) {
       $queries = Array();
-      $pdo->rollBack();
+      if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+      }
       throw $ex;
     }
     return $queries;

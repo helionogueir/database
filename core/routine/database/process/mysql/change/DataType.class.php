@@ -33,32 +33,37 @@ class DataType implements Process {
 
   public function get(PDO $pdo, Info $info, stdClass $variables, Trace $output = null): Array {
     $queries = Array();
+    if (!$pdo->inTransaction()) {
+      $pdo->beginTransaction();
+    }
     try {
       if (!is_null($output)) {
         $output->display(Lang::get("database:trace:start", "helionogueir/database", Array("classname" => __CLASS__)));
       }
-      $pdo->beginTransaction();
       if ($steps = $this->prepareSteps($pdo, $info, $variables)) {
         foreach ($steps as $step) {
           if (count($step)) {
             foreach ($step as $sql) {
               $queries[] = $sql;
-              $stmt = $pdo->prepare($sql);
-              $stmt->execute();
               if (!is_null($output)) {
                 $output->display($sql, 1, "-");
               }
+              $pdo->exec($sql);
             }
           }
         }
       }
-      $pdo->commit();
+      if ($pdo->inTransaction()) {
+        $pdo->commit();
+      }
       if (!is_null($output)) {
         $output->display(Lang::get("database:trace:finish", "helionogueir/database", Array("classname" => __CLASS__)));
       }
     } catch (Exception $ex) {
       $queries = Array();
-      $pdo->rollBack();
+      if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+      }
       throw $ex;
     }
     return $queries;
@@ -83,10 +88,11 @@ class DataType implements Process {
       );
       foreach ((new ForeignKey())->get($pdo, $info, $variables) as $query) {
         $steps["removeForeignKey"][] = "ALTER TABLE `{$query->schema}`.`{$query->table}` DROP FOREIGN KEY `{$query->foreignKey}`;";
-        $steps["changeDataType"][] = "ALTER TABLE `{$query->schema}`.`{$query->table}` MODIFY COLUMN `{$this->column}` {$this->type};";
+        $steps["changeDataType"][] = "ALTER TABLE `{$query->schema}`.`{$query->table}` MODIFY COLUMN `{$query->column}` {$this->type};";
         $steps["addForeignKey"][] = "ALTER TABLE `{$query->schema}`.`{$query->table}` ADD CONSTRAINT `{$query->foreignKey}` FOREIGN KEY (`{$query->column}`) REFERENCES `{$query->schemaReferenced}`.`{$query->tableReferenced}` (`{$query->columnReferenced}`) ON UPDATE NO ACTION ON DELETE NO ACTION;";
       }
     }
+    //print_r($steps);die;
     return $steps;
   }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace helionogueir\database\routine\database\process\mysql\find;
+namespace helionogueir\database\routine\database\process\mysql\change;
 
 use PDO;
 use stdClass;
@@ -12,7 +12,7 @@ use helionogueir\database\routine\database\Info;
 use helionogueir\database\routine\database\Process;
 
 /**
- * - MySQL find foreign key
+ * - MySQL data type functionality
  * @author Helio Nogueira <helio.nogueir@gmail.com>
  * @version v1.0.0
  */
@@ -20,6 +20,9 @@ class ForeignKey implements Process {
 
   private $table = null;
   private $column = null;
+  private $schemaReplace = null;
+  private $tableReplace = null;
+  private $columnReplace = null;
 
   public function render(PDO $pdo, Info $info, stdClass $variables, Trace $output): bool {
     $executed = false;
@@ -39,35 +42,13 @@ class ForeignKey implements Process {
         $output->display(Lang::get("database:trace:start", "helionogueir/database", Array("classname" => __CLASS__)));
       }
       if ($this->factoryParameter($variables)) {
-        $select = "SELECT
-                    CONSTRAINT_NAME AS `foreignKey`,
-                    TABLE_SCHEMA AS `schema`,
-                    TABLE_NAME AS `table`,
-                    COLUMN_NAME AS `column`,
-                    REFERENCED_TABLE_SCHEMA AS `schemaReferenced`,
-                    REFERENCED_TABLE_NAME AS `tableReferenced`,
-                    REFERENCED_COLUMN_NAME AS `columnReferenced`
-                  FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-                  WHERE TABLE_SCHEMA = :dbname
-                  AND REFERENCED_TABLE_NAME = :table
-                  AND REFERENCED_COLUMN_NAME = :column";
-        $stmt = $pdo->prepare($select);
-        $stmt->execute(Array(
-          "dbname" => $info->getDbname(),
-          "table" => $this->table,
-          "column" => $this->column
-        ));
-        if ($pdo->inTransaction()) {
-          $pdo->commit();
+        foreach ((new \helionogueir\database\routine\database\process\mysql\find\ForeignKey())->get($pdo, $info, $variables) as $query) {
+          $this->removeForeignKey($pdo, $query, $output);
+          $this->AddForeignKey($pdo, $query, $output);
         }
-        foreach ($stmt->fetchAll() as $row) {
-          if (!empty($row->foreignKey) && !empty($row->schema) && !empty($row->table) && !empty($row->column) && !empty($row->schemaReferenced) && !empty($row->tableReferenced) && !empty($row->columnReferenced)) {
-            $queries[] = $row;
-            if (!is_null($output)) {
-              $output->display("{$row->foreignKey} / {$row->schema}.{$row->table}", 1, "-");
-            }
-          }
-        }
+      }
+      if ($pdo->inTransaction()) {
+        $pdo->commit();
       }
       if (!is_null($output)) {
         $output->display(Lang::get("database:trace:finish", "helionogueir/database", Array("classname" => __CLASS__)));
@@ -83,6 +64,38 @@ class ForeignKey implements Process {
   }
 
   /**
+   * - Remove foreign key
+   * @param PDO $pdo MySQL PDO
+   * @param stdClass $query Query info
+   * @param helionogueir\shell\output\Trace $output Print class
+   * @return bool Return true case match variable
+   */
+  private function removeForeignKey(PDO $pdo, stdClass $query, Trace $output = null) {
+    $sql = "ALTER TABLE `{$query->schema}`.`{$query->table}` DROP FOREIGN KEY `{$query->foreignKey}`;";
+    if (!is_null($output)) {
+      $output->display($sql, 1, "-");
+    }
+    $pdo->exec($sql);
+    return null;
+  }
+
+  /**
+   * - Add foreign key
+   * @param PDO $pdo MySQL PDO
+   * @param stdClass $query Query info
+   * @param helionogueir\shell\output\Trace $output Print class
+   * @return bool Return true case match variable
+   */
+  private function AddForeignKey(PDO $pdo, stdClass $query, Trace $output = null) {
+    $sql = "ALTER TABLE `{$query->schema}`.`{$query->table}` ADD CONSTRAINT `{$query->foreignKey}` FOREIGN KEY (`{$query->column}`) REFERENCES `{$this->schemaReplace}`.`{$this->tableReplace}` (`{$this->columnReplace}`) ON UPDATE NO ACTION ON DELETE NO ACTION;";
+    if (!is_null($output)) {
+      $output->display($sql, 1, "-");
+    }
+    $pdo->exec($sql);
+    return null;
+  }
+
+  /**
    * - Render change data type
    * @param stdClass $variables Content variables for execute functionality
    * @return bool Return true case match variable
@@ -90,7 +103,7 @@ class ForeignKey implements Process {
   private function factoryParameter(stdClass $variables): bool {
     $match = true;
     Lang::addRoot(Environment::PACKAGE, Environment::PATH);
-    foreach (Array("table", "column")as $parameter) {
+    foreach (Array("table", "column", "schemaReplace", "tableReplace", "columnReplace")as $parameter) {
       if (empty($variables->{$parameter})) {
         $match = false;
         throw new Exception(Lang::get("database:json:paramter:invalid", "helionogueir/database", Array("paramter" => $parameter)));

@@ -1,6 +1,6 @@
 <?php
 
-namespace helionogueir\database\column;
+namespace helionogueir\database\field;
 
 use PDO;
 use stdClass;

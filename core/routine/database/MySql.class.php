@@ -21,7 +21,7 @@ class MySql {
   public function connect(Info $info): PDO {
     try {
       $mysql = new PDO("{$info->getDsn()}:host={$info->getHost()};dbname={$info->getDbname()};port={$info->getPort()};charset={$info->getCharset()}", $info->getUser(), $info->getPassword(), array(
-        PDO::ATTR_AUTOCOMMIT => true,
+        PDO::ATTR_AUTOCOMMIT => false,
         PDO::ATTR_PERSISTENT => false,
         PDO::ATTR_EMULATE_PREPARES => true,
         PDO::ATTR_TIMEOUT => 1800,
