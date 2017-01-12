@@ -11,6 +11,7 @@ use helionogueir\database\autoload\Environment;
 use helionogueir\database\routine\database\Info;
 use helionogueir\database\routine\database\Process;
 use helionogueir\database\routine\database\process\mysql\find\ForeignKey;
+use helionogueir\database\routine\database\process\mysql\find\AutoIncrement;
 
 /**
  * - MySQL data type functionality
@@ -83,7 +84,7 @@ class DataType implements Process {
       $steps = Array(
         "removeForeignKey" => Array(),
         "changeDataType" => Array(),
-        "changeReferenceTable" => Array("ALTER TABLE `{$info->getDbname()}`.`{$this->table}` MODIFY COLUMN `{$this->column}` {$this->type};"),
+        "changeReferenceTable" => Array("ALTER TABLE `{$info->getDbname()}`.`{$this->table}` MODIFY COLUMN `{$this->column}` {$this->type}{$this->isAutoIncrement($pdo, $info, $variables)};"),
         "addForeignKey" => Array()
       );
       foreach ((new ForeignKey())->get($pdo, $info, $variables) as $query) {
@@ -94,6 +95,21 @@ class DataType implements Process {
     }
     //print_r($steps);die;
     return $steps;
+  }
+
+  /**
+   * - Check if field is auto increment
+   * @param PDO $pdo MySQL PDO
+   * @param helionogueir\database\routine\database\Info $info Database info connection
+   * @param stdClass $variables Content variables for execute functionality
+   * @return string Return if field is auto increment
+   */
+  private function isAutoIncrement(PDO $pdo, Info $info, stdClass $variables): string {
+    $autoIncrement = "";
+    if ((new AutoIncrement())->get($pdo, $info, $variables)) {
+      $autoIncrement = " AUTO_INCREMENT";
+    }
+    return $autoIncrement;
   }
 
   /**
