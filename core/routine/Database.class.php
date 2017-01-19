@@ -3,7 +3,6 @@
 namespace helionogueir\database\routine;
 
 use PDO;
-use stdClass;
 use Exception;
 use helionogueir\languagepack\Lang;
 use helionogueir\database\autoload\Environment;

@@ -1,20 +1,20 @@
 <?php
 
-namespace helionogueir\database\table;
+namespace helionogueir\database\command\field;
 
 use PDO;
 use stdClass;
 use helionogueir\shell\output\Trace;
 use helionogueir\database\Routine;
 use helionogueir\database\routine\database\Info;
-use helionogueir\database\routine\database\process\mysql\import\Csv;
+use helionogueir\database\routine\database\process\mysql\add\AutoIncrement;
 
 /**
- * - Change behavior of column
+ * - Add behavior of column
  * @author Helio Nogueira <helio.nogueir@gmail.com>
  * @version v1.0.0
  */
-class Import implements Routine {
+class Add implements Routine {
 
   private $info = null;
   private $pdo = null;
@@ -28,12 +28,12 @@ class Import implements Routine {
   }
 
   /**
-   * - Import CSV in table
+   * - Chancge data type
    * @param stdClass $variable Content variables for execute functionality
    * @return null
    */
-  public function csv(stdClass $variable) {
-    (new Csv())->render($this->pdo, $this->info, $variable, $this->output);
+  public function autoIncrement(stdClass $variable) {
+    (new AutoIncrement())->render($this->pdo, $this->info, $variable, $this->output);
   }
 
 }
