@@ -21,8 +21,7 @@ class WithoutReference implements Process {
 
   private $table = null;
   private $column = null;
-  private $idOld = null;
-  private $idNew = null;
+  private $list = null;
 
   public function render(PDO $pdo, Info $info, stdClass $variables, Trace $output): bool {
     $executed = false;
@@ -38,30 +37,34 @@ class WithoutReference implements Process {
       if (!is_null($output)) {
         $output->display(Lang::get("database:trace:start", "helionogueir/database", Array("classname" => __CLASS__)));
       }
-      if ($select = $this->selectDependencies($pdo, $info, $variables)) {
-        print_r($select);
-        die;
+      if ($this->factoryParameter($variables)) {
         if (!$pdo->inTransaction()) {
           $pdo->beginTransaction();
         }
-        foreach ($select as $sql) {
-          $queries[] = $sql;
-          if (!is_null($output)) {
-            $output->display($sql, 1, "-");
+        $delete = "DELETE FROM `{$info->getDbname()}`.`{$this->table}` WHERE `{$this->column}` = : id";
+        $stmt = $pdo->prepare($delete);
+        if ($select = $this->selectDependencies($pdo, $info, $variables)) {
+          foreach ($this->list as $id) {
+            $canDelete = true;
+            foreach ($select as $sql) {
+              $stmt = $pdo->prepare($sql);
+              $stmt->execute(Array("id" => $id));
+              foreach ($stmt->fetchAll() as $row) {
+                if (!empty($row->total)) {
+                  $canDelete = false;
+                  break;
+                }
+              }
+            }
+            if ($canDelete) {
+              $queries[] = $delete;
+              if (!is_null($output)) {
+                $output->display("{$delete} / {$id}", 1, "-");
+              }
+              $stmt->execute(Array("id" => $id));
+            }
           }
-          $stmt = $pdo->prepare($sql);
-          $stmt->execute(Array(
-            "idOld" => $this->idOld,
-            "idNew" => $this->idNew
-          ));
         }
-        $sql = "DELETE FROM `{$info->getDbname()}`.`{$this->table}` WHERE `{$this->column}` = :idOld";
-        if (!is_null($output)) {
-          $output->display($sql, 1, "-");
-        }
-        $queries[] = $sql;
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute(Array("idOld" => $this->idOld));
       }
       if ($pdo->inTransaction()) {
         $pdo->commit();
@@ -88,10 +91,8 @@ class WithoutReference implements Process {
    */
   private function selectDependencies(PDO $pdo, Info $info, stdClass $variables): Array {
     $select = Array();
-    if ($this->factoryParameter($variables)) {
-      foreach ((new ForeignKey())->get($pdo, $info, $variables) as $query) {
-        $select[] = "SELECT COUNT(`tbl`.`{$query->column}`) AS `total` FROM `{$query->schema}`.`{$query->table}` AS `tbl` WHERE `tbl`.`{$query->column}` = :id";
-      }
+    foreach ((new ForeignKey())->get($pdo, $info, $variables) as $query) {
+      $select[] = "SELECT COUNT(`tbl`.`{$query->column}`) AS `total` FROM `{$query->schema}`.`{$query->table}` AS `tbl` WHERE `tbl`.`{$query->column}` = :id";
     }
     return $select;
   }
