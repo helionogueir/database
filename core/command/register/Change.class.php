@@ -1,20 +1,20 @@
 <?php
 
-namespace helionogueir\database\command\table;
+namespace helionogueir\database\command\register;
 
 use PDO;
 use stdClass;
 use helionogueir\shell\output\Trace;
 use helionogueir\database\Routine;
 use helionogueir\database\routine\database\Info;
-use helionogueir\database\routine\database\process\mysql\create\Table;
+use helionogueir\database\routine\database\process\mysql\change\RegisterReference;
 
 /**
- * - Change behavior of table
+ * - Change behavior of column
  * @author Helio Nogueira <helio.nogueir@gmail.com>
  * @version v1.0.0
  */
-class Create implements Routine {
+class Change implements Routine {
 
   private $info = null;
   private $pdo = null;
@@ -28,12 +28,12 @@ class Create implements Routine {
   }
 
   /**
-   * - Create table and insert rows
+   * - Change reference and remove old rerence
    * @param stdClass $variable Content variables for execute functionality
    * @return null
    */
-  public function table(stdClass $variable) {
-    (new Table())->render($this->pdo, $this->info, $variable, $this->output);
+  public function registerReference(stdClass $variable) {
+    (new RegisterReference())->render($this->pdo, $this->info, $variable, $this->output);
   }
 
 }
