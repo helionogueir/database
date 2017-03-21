@@ -88,6 +88,18 @@ class DataType implements Process {
         "addForeignKey" => Array()
       );
       foreach ((new ForeignKey())->get($pdo, $info, $variables) as $query) {
+        $variablesChidren = (object)Array(
+          "table" => $query->table,
+          "column" => $query->column,
+          "type" => $this->type
+        );
+        if ($stepsChidren = $this->prepareSteps($pdo, $info, $variablesChidren)) {
+          foreach ($stepsChidren as $topic => $chidren) {
+            foreach ($chidren as $value) {
+              $steps[$topic][] = $value;
+            }
+          }
+        }
         $steps["removeForeignKey"][] = "ALTER TABLE `{$query->schema}`.`{$query->table}` DROP FOREIGN KEY `{$query->foreignKey}`;";
         $steps["changeDataType"][] = "ALTER TABLE `{$query->schema}`.`{$query->table}` MODIFY COLUMN `{$query->column}` {$this->type};";
         $steps["addForeignKey"][] = "ALTER TABLE `{$query->schema}`.`{$query->table}` ADD CONSTRAINT `{$query->foreignKey}` FOREIGN KEY (`{$query->column}`) REFERENCES `{$query->schemaReferenced}`.`{$query->tableReferenced}` (`{$query->columnReferenced}`) ON UPDATE NO ACTION ON DELETE NO ACTION;";
